@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>MotoSafe Audit - SM4A4L</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+
+<body>
+
+<header>
+<h1>MotoSafe Audit</h1>
+<p>Prototipo de evaluación de infraestructura segura para motociclistas – SM4A4L</p>
+</header>
+
+<div class="container">
+
+<div id="map"></div>
+
+<div class="panel">
+
+<h2>Auditoría de Infraestructura</h2>
+
+<label>Estado del pavimento</label>
+<select id="pavement">
+<option value="5">Excelente</option>
+<option value="3">Regular</option>
+<option value="1">Malo</option>
+</select>
+
+<label>Baches</label>
+<select id="potholes">
+<option value="5">No hay</option>
+<option value="3">Algunos</option>
+<option value="1">Muchos</option>
+</select>
+
+<label>Señalización horizontal</label>
+<select id="signage">
+<option value="5">Clara</option>
+<option value="3">Desgastada</option>
+<option value="1">Inexistente</option>
+</select>
+
+<label>Iluminación</label>
+<select id="lighting">
+<option value="5">Buena</option>
+<option value="3">Regular</option>
+<option value="1">Mala</option>
+</select>
+
+<label>Velocidad promedio</label>
+<select id="speed">
+<option value="5">≤40 km/h</option>
+<option value="3">40-60 km/h</option>
+<option value="1">≥60 km/h</option>
+</select>
+
+<label>Seguridad lateral</label>
+<select id="roadside">
+<option value="5">Segura</option>
+<option value="3">Media</option>
+<option value="1">Peligrosa</option>
+</select>
+
+<label>Intersecciones</label>
+<select id="intersection">
+<option value="5">Seguras</option>
+<option value="3">Conflictos moderados</option>
+<option value="1">Alto riesgo</option>
+</select>
+
+<button onclick="calculateScore()">Calcular Seguridad</button>
+
+<div id="result"></div>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
