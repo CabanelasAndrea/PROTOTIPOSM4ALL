@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM4A4L | Infraestructura Segura - Perspectiva Motociclista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --neon-amber: #FF6B00;
+            --neon-cyan: #00F0FF;
+            --dark-bg: #0A0A0F;
+            --panel-bg: #15151E;
+            --grid-color: rgba(255, 107, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #E0E0E0;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Efecto de scanline */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+        
+        /* Grid de fondo */
+        .bg-grid {
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Glitch effect */
+        .glitch {
+            position: relative;
+            animation: glitch-skew 3s infinite;
+        }
+        
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            20% { transform: skew(-2deg); }
+            40% { transform: skew(2deg); }
+            60% { transform: skew(0deg); }
+            100% { transform: skew(0deg); }
+        }
+        
+        /* Cards con borde neón */
+        .neon-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .neon-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-amber), transparent, var(--neon-cyan));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .neon-card:hover::before {
+            opacity: 0.5;
+        }
+        
+        .neon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(255, 107, 0, 0.2);
+            border-color: var(--neon-amber);
+        }
+        
+        /* Botones estilo industrial */
+        .btn-industrial {
+            background: transparent;
+            border: 2px solid var(--neon-amber);
+            color: var(--neon-amber);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .btn-industrial::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--neon-amber);
+            transition: left 0.3s;
+            z-index: -1;
+        }
+        
+        .btn-industrial:hover::before {
+            left: 0;
+        }
+        
+        .btn-industrial:hover {
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-amber);
+        }
+        
+        /* Navegación lateral */
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .nav-dot.active {
+            background: var(--neon-amber);
+            border-color: var(--neon-amber);
+            box-shadow: 0 0 10px var(--neon-amber);
+        }
+        
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--neon-amber);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        
+        .nav-dot:hover::after {
+            opacity: 1;
+        }
+        
+        /* Progress bar circular para evaluación */
+        .circular-progress {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+        
+        .circular-progress svg {
+            transform: rotate(-90deg);
+        }
+        
+        .circular-progress circle {
+            fill: none;
+            stroke-width: 8;
+        }
+        
+        .circular-progress .bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+        
+        .circular-progress .progress {
+            stroke: var(--neon-amber);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+        
+        /* Typing effect */
+        .typing {
+            overflow: hidden;
+            border-right: 2px solid var(--neon-amber);
+            white-space: nowrap;
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--neon-amber); }
+        }
+        
+        /* Radar chart para evaluación */
+        .radar-container {
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+        }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-amber);
+            border-radius: 4px;
+        }
+        
+        /* Secciones */
+        section {
+            min-height: 100vh;
+            position: relative;
+            padding: 4rem 2rem;
+        }
+        
+        .section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--neon-amber);
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-amber), transparent);
+        }
+        
+        /* Warning stripes */
+        .warning-stripes {
+            background: repeating-linear-gradient(
+                45deg,
+                var(--neon-amber),
+                var(--neon-amber) 10px,
+                #000 10px,
+                #000 20px
+            );
+            height: 20px;
+            width: 100%;
+        }
+        
+        /* Interactive matrix */
+        .matrix-cell {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .matrix-cell:hover {
+            background: rgba(255, 107, 0, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .matrix-cell.active {
+            background: var(--neon-amber);
+            color: #000;
+            font-weight: bold;
+        }
+        
+        /* Parallax elements */
+        .parallax-bg {
+            position: absolute;
+            width: 100%;
+            height: 120%;
+            top: -10%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .modal-content {
+            background: var(--panel-bg);
+            border: 2px solid var(--neon-amber);
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+            box-shadow: 0 0 50px rgba(255, 107, 0, 0.3);
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--neon-amber);
+            background: transparent;
+            color: var(--neon-amber);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .modal-close:hover {
+            background: var(--neon-amber);
+            color: var(--dark-bg);
+            transform: rotate(90deg);
+        }
+        
+        /* Recommendation cards */
+        .recommendation-card {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(0, 240, 255, 0.05));
+            border-left: 4px solid var(--neon-amber);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(0, 240, 255, 0.1));
+        }
+        
+        .priority-high { border-left-color: #EF4444; }
+        .priority-medium { border-left-color: #F59E0B; }
+        .priority-low { border-left-color: #10B981; }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2rem;
+            }
+            .nav-sidebar {
+                display: none;
+            }
+            .modal-content {
+                margin: 1rem;
+                max-height: 85vh;
+            }
+        }
+        
+        /* Animación de entrada para recomendaciones */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .recommendation-animate {
+            animation: slideIn 0.5s ease forwards;
+        }
+    </style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+    <!-- Modal Global -->
+    <div class="modal-overlay" id="infoModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div id="modalBody" class="p-8">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Efectos visuales -->
+    <div class="scanlines"></div>
+    <div class="bg-grid"></div>
+    
+    <!-- Navegación lateral -->
+    <nav class="nav-sidebar fixed right-8 top-1/2 transform -translate-y-1/2 z-50 flex flex-col gap-6 hidden md:flex">
+        <div class="nav-dot active" data-label="INICIO" onclick="scrollToSection('hero')"></div>
+        <div class="nav-dot" data-label="CONTEXTO" onclick="scrollToSection('contexto')"></div>
+        <div class="nav-dot" data-label="SISTEMA SEGURO" onclick="scrollToSection('sistema')"></div>
+        <div class="nav-dot" data-label="RIESGOS" onclick="scrollToSection('riesgos')"></div>
+        <div class="nav-dot" data-label="DISEÑO" onclick="scrollToSection('diseno')"></div>
+        <div class="nav-dot" data-label="EVALUACIÓN" onclick="scrollToSection('evaluacion')"></div>
+        <div class="nav-dot" data-label="HERRAMIENTAS" onclick="scrollToSection('herramientas')"></div>
+    </nav>
+
+    <!-- SECCIÓN 1: HERO -->
+    <section id="hero" class="flex items-center justify-center relative overflow-hidden">
+        <div class="parallax-bg" id="parallax-hero"></div>
+        
+        <div class="container mx-auto max-w-6xl relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="font-mono text-sm text-cyan-400 tracking-widest mb-4 border border-cyan-400/30 inline-block px-3 py-1">
+                        PROGRAMA SM4A4L v2.0
+                    </div>
+                    <h1 class="text-6xl md:text-8xl font-black leading-none glitch" style="color: var(--neon-amber);">
+                        INFRA<br>
+                        <span class="text-white">ESTRUCTURA</span><br>
+                        <span class="text-cyan-400">SEGURA</span>
+                    </h1>
+                    <div class="h-12">
+                        <p class="font-mono text-xl text-gray-400 typing" id="typing-text">
+                            Perspectiva Motociclista...
+                        </p>
+                    </div>
+                    <p class="text-lg text-gray-400 max-w-lg leading-relaxed">
+                        Manual técnico disruptivo para el diseño, evaluación e implementación de infraestructura vial centrada en la seguridad de los motociclistas.
+                    </p>
+                    <div class="flex gap-4 pt-4">
+                        <button class="btn-industrial px-8 py-4 font-bold" onclick="scrollToSection('contexto')">
+                            Iniciar Auditoría
+                        </button>
+                        <button class="btn-industrial px-8 py-4 font-bold border-cyan-400 text-cyan-400 hover:shadow-[0_0_20px_#00F0FF]" onclick="scrollToSection('evaluacion')" style="--neon-amber: #00F0FF;">
+                            Matriz de Evaluación
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="neon-card p-8 rounded-lg relative overflow-hidden" onclick="openModal('hero-stats')">
+                        <div class="absolute top-0 right-0 p-4 font-mono text-xs text-gray-500">SYS.01//MOTO (Click para detalles)</div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                                <span class="font-mono text-sm text-gray-400">ESTADO DEL SISTEMA</span>
+                                <span class="text-green-400 font-mono text-sm">● ACTIVO</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-black/30 p-4 rounded border border-gray-800">
+                                    <div class="text-3xl font-bold text-white font-mono">23%</div>
+                                    <div class="text-xs text-gray-500 mt-1">FATALIDADES VIALES</div>
+                                    <div class="text-xs text-cyan-400 mt-1">Motociclistas LATAM</div>
+                                </div>
+                                <div class="bg-black/30 p-4 rounded border border-gray-800">
+                                    <div class="text-3xl font-bold text-white font-mono">40M+</div>
+                                    <div class="text-xs text-gray-500 mt-1">UNIDADES</div>
+                                    <div class="text-xs text-cyan-400 mt-1">Parque motociclista</div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-mono">
+                                    <span class="text-gray-400">INFRAESTRUCTURA ADAPTADA</span>
+                                    <span class="text-amber-500">12%</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full" style="width: 12%"></div>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded font-mono text-xs text-amber-400">
+                                ⚠ ALERTA: Brecha crítica entre crecimiento de flota y adaptación vial
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Elementos flotantes decorativos -->
+                    <div class="absolute -top-10 -right-10 w-32 h-32 border-2 border-cyan-400/20 rounded-full animate-pulse"></div>
+                    <div class="absolute -bottom-10 -left-10 w-24 h-24 border-2 border-amber-500/20 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 w-full warning-stripes"></div>
+    </section>
+
+    <!-- SECCIÓN 2: CONTEXTO GLOBAL -->
+    <section id="contexto" class="relative">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="section-title glitch">Contexto Crítico</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="neon-card p-6 rounded-lg" data-aos="fade-up" onclick="openModal('riesgo-5x')">
+                    <div class="text-5xl font-black text-cyan-400 font-mono mb-2">5x</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Mayor Riesgo</h3>
+                    <p class="text-gray-400 text-sm">Probabilidad de lesión fatal vs ocupantes de automóviles. Click para análisis detallado.</p>
+                    <div class="mt-4 text-xs text-amber-500 font-mono">Ver detalles →</div>
+                </div>
+                
+                <div class="neon-card p-6 rounded-lg" data-aos="fade-up" data-aos-delay="100" onclick="openModal('crecimiento-70')">
+                    <div class="text-5xl font-black text-amber-500 font-mono mb-2">70%</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Crecimiento</h3>
+                    <p class="text-gray-400 text-sm">Aumento del parque motociclista en América Latina durante la última década.</p>
+                    <div class="mt-4 text-xs text-amber-500 font-mono">Ver detalles →</div>
+                </div>
+                
+                <div class="neon-card p-6 rounded-lg" data-aos="fade-up" data-aos-delay="200" onclick="openModal('victimas-1')">
+                    <div class="text-5xl font-black text-red-500 font-mono mb-2">#1</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Víctimas</h3>
+                    <p class="text-gray-400 text-sm">Principal grupo vulnerable en siniestros viales en zonas urbanas de LATAM.</p>
+                    <div class="mt-4 text-xs text-amber-500 font-mono">Ver detalles →</div>
+                </div>
+            </div>
+
+            <div class="neon-card p-8 rounded-lg mb-8" onclick="openModal('factores-expansion')">
+                <h3 class="text-2xl font-bold text-white mb-6 font-mono flex items-center gap-3">
+                    <i data-lucide="alert-triangle" class="text-amber-500"></i>
+                    Factores de Expansión Motociclista
+                    <span class="text-xs text-gray-500 ml-auto">(Click para expandir)</span>
+                </h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-black/40 p-4 rounded border-l-4 border-cyan-400 hover:bg-cyan-400/10 transition-all cursor-pointer group">
+                        <i data-lucide="package" class="text-cyan-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <h4 class="font-bold text-white text-sm mb-1">Logística</h4>
+                        <p class="text-xs text-gray-500">Servicios de mensajería y delivery</p>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded border-l-4 border-amber-500 hover:bg-amber-500/10 transition-all cursor-pointer group">
+                        <i data-lucide="wallet" class="text-amber-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <h4 class="font-bold text-white text-sm mb-1">Economía</h4>
+                        <p class="text-xs text-gray-500">Accesibilidad y bajo costo operativo</p>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded border-l-4 border-purple-500 hover:bg-purple-500/10 transition-all cursor-pointer group">
+                        <i data-lucide="traffic-cone" class="text-purple-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <h4 class="font-bold text-white text-sm mb-1">Congestión</h4>
+                        <p class="text-xs text-gray-500">Eficiencia en tráfico urbano</p>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded border-l-4 border-green-500 hover:bg-green-500/10 transition-all cursor-pointer group">
+                        <i data-lucide="smartphone" class="text-green-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <h4 class="font-bold text-white text-sm mb-1">Digital</h4>
+                        <p class="text-xs text-gray-500">Expansión del comercio electrónico</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-500/20 to-cyan-500/20 border border-amber-500/30 p-6 rounded-lg">
+                <p class="text-lg text-white font-mono">
+                    <span class="text-amber-500">></span> La infraestructura vial NO ha evolucionado al ritmo de este crecimiento. El diseño continúa orientado principalmente al automóvil.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 3: SISTEMA SEGURO -->
+    <section id="sistema" class="relative">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="section-title glitch">Enfoque de Sistema Seguro</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center mb-12">
+                <div>
+                    <div class="neon-card p-8 rounded-lg mb-6" onclick="openModal('principios-fundamentales')">
+                        <h3 class="text-xl font-bold text-cyan-400 font-mono mb-4">PRINCIPIOS FUNDAMENTALES</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3 group cursor-pointer">
+                                <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500 flex items-center justify-center text-amber-500 font-bold text-xs group-hover:bg-amber-500 group-hover:text-black transition-all">1</div>
+                                <div>
+                                    <h4 class="text-white font-bold">Error Humano</h4>
+                                    <p class="text-sm text-gray-400">Los seres humanos cometen errores. El sistema debe tolerarlos.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 group cursor-pointer">
+                                <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500 flex items-center justify-center text-amber-500 font-bold text-xs group-hover:bg-amber-500 group-hover:text-black transition-all">2</div>
+                                <div>
+                                    <h4 class="text-white font-bold">Tolerancia Física</h4>
+                                    <p class="text-sm text-gray-400">El cuerpo humano tiene límites de tolerancia al impacto.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 group cursor-pointer">
+                                <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500 flex items-center justify-center text-amber-500 font-bold text-xs group-hover:bg-amber-500 group-hover:text-black transition-all">3</div>
+                                <div>
+                                    <h4 class="text-white font-bold">Responsabilidad Compartida</h4>
+                                    <p class="text-sm text-gray-400">Todos los elementos del sistema deben minimizar consecuencias.</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="mt-4 text-xs text-cyan-400 font-mono text-right">Click para metodología completa →</div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="neon-card p-6 rounded-lg" onclick="openModal('pilares-sistema')">
+                        <h3 class="text-lg font-bold text-white mb-4 font-mono text-center">PILARES DEL SISTEMA</h3>
+                        <div class="relative h-80 flex items-center justify-center">
+                            <!-- Diagrama circular interactivo -->
+                            <div class="absolute w-48 h-48 rounded-full border-2 border-amber-500/30 animate-pulse"></div>
+                            <div class="absolute w-32 h-32 rounded-full border-2 border-cyan-400/30 animate-pulse" style="animation-delay: 0.5s"></div>
+                            
+                            <div class="relative z-10 grid grid-cols-2 gap-4 w-full max-w-xs">
+                                <div class="bg-black/60 p-3 rounded border border-amber-500/50 text-center hover:bg-amber-500/20 transition-all cursor-pointer transform hover:scale-105">
+                                    <i data-lucide="user" class="mx-auto mb-1 text-amber-500"></i>
+                                    <div class="text-xs font-bold text-white">USUARIOS</div>
+                                </div>
+                                <div class="bg-black/60 p-3 rounded border border-cyan-400/50 text-center hover:bg-cyan-400/20 transition-all cursor-pointer transform hover:scale-105">
+                                    <i data-lucide="car" class="mx-auto mb-1 text-cyan-400"></i>
+                                    <div class="text-xs font-bold text-white">VEHÍCULOS</div>
+                                </div>
+                                <div class="bg-black/60 p-3 rounded border border-purple-500/50 text-center hover:bg-purple-500/20 transition-all cursor-pointer transform hover:scale-105">
+                                    <i data-lucide="road" class="mx-auto mb-1 text-purple-500"></i>
+                                    <div class="text-xs font-bold text-white">INFRAESTRUCTURA</div>
+                                </div>
+                                <div class="bg-black/60 p-3 rounded border border-green-500/50 text-center hover:bg-green-500/20 transition-all cursor-pointer transform hover:scale-105">
+                                    <i data-lucide="activity" class="mx-auto mb-1 text-green-500"></i>
+                                    <div class="text-xs font-bold text-white">VELOCIDADES</div>
+                                </div>
+                            </div>
+                            
+                            <div class="absolute bottom-0 w-full text-center">
+                                <div class="inline-block bg-red-500/20 border border-red-500/50 px-4 py-2 rounded text-xs text-red-400 font-mono">
+                                    <i data-lucide="heart-pulse" class="inline w-3 h-3 mr-1"></i>
+                                    RESPUESTA POST-SINIESTRO
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-xs text-cyan-400 font-mono text-center">Click para detalles de integración →</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 4: FACTORES DE RIESGO -->
+    <section id="riesgos" class="relative">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="section-title glitch">Factores de Riesgo Críticos</h2>
+            <p class="text-gray-400 mb-8 max-w-2xl">Los motociclistas presentan sensibilidad particular frente a características específicas de la infraestructura. <span class="text-amber-500">Click en cada tarjeta para protocolo de intervención.</span></p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Riesgo 1 -->
+                <div class="neon-card p-6 rounded-lg group hover:border-red-500 transition-all" onclick="openModal('riesgo-pavimento')">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="alert-octagon" class="text-red-500 w-8 h-8"></i>
+                        <span class="font-mono text-xs text-red-500 bg-red-500/10 px-2 py-1 rounded">CRÍTICO</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Pavimento Deficiente</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-red-500 rounded-full"></span>Baches y grietas</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-red-500 rounded-full"></span>Superficies resbaladizas</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-red-500 rounded-full"></span>Tapas de servicios desniveladas</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-xs font-mono text-gray-500">CONSECUENCIA: Pérdida de estabilidad</div>
+                        <div class="mt-2 text-xs text-amber-500">Ver protocolo de inspección →</div>
+                    </div>
+                </div>
+
+                <!-- Riesgo 2 -->
+                <div class="neon-card p-6 rounded-lg group hover:border-orange-500 transition-all" onclick="openModal('riesgo-senalizacion')">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="signpost" class="text-orange-500 w-8 h-8"></i>
+                        <span class="font-mono text-xs text-orange-500 bg-orange-500/10 px-2 py-1 rounded">ALTO</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Señalización Inadecuada</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-orange-500 rounded-full"></span>Pintura antideslizante ausente</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-orange-500 rounded-full"></span>Señales ocultas o desgastadas</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-orange-500 rounded-full"></span>Marcas viales elevadas</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-xs font-mono text-gray-500">CONSECUENCIA: Deslizamiento en curvas</div>
+                        <div class="mt-2 text-xs text-amber-500">Ver especificaciones técnicas →</div>
+                    </div>
+                </div>
+
+                <!-- Riesgo 3 -->
+                <div class="neon-card p-6 rounded-lg group hover:border-yellow-500 transition-all" onclick="openModal('riesgo-intersecciones')">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="git-merge" class="text-yellow-500 w-8 h-8"></i>
+                        <span class="font-mono text-xs text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">ALTO</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Intersecciones Peligrosas</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-yellow-500 rounded-full"></span>Visibilidad limitada</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-yellow-500 rounded-full"></span>Conflictos de trayectoria</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-yellow-500 rounded-full"></span>Falta de refugios</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-xs font-mono text-gray-500">CONSECUENCIA: Colisiones angulares</div>
+                        <div class="mt-2 text-xs text-amber-500">Ver diseño de intersecciones seguras →</div>
+                    </div>
+                </div>
+
+                <!-- Riesgo 4 -->
+                <div class="neon-card p-6 rounded-lg group hover:border-purple-500 transition-all" onclick="openModal('riesgo-seguridad-lateral')">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="shield" class="text-purple-500 w-8 h-8"></i>
+                        <span class="font-mono text-xs text-purple-500 bg-purple-500/10 px-2 py-1 rounded">MEDIO</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Seguridad Lateral</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-purple-500 rounded-full"></span>Obstáculos rígidos cercanos</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-purple-500 rounded-full"></span>Barreras no aptas</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-purple-500 rounded-full"></span>Postes y árboles</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-xs font-mono text-gray-500">CONSECUENCIA: Lesiones por impacto</div>
+                        <div class="mt-2 text-xs text-amber-500">Ver zonas de recuperación →</div>
+                    </div>
+                </div>
+
+                <!-- Riesgo 5 -->
+                <div class="neon-card p-6 rounded-lg group hover:border-cyan-500 transition-all" onclick="openModal('riesgo-geometria')">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="gauge" class="text-cyan-500 w-8 h-8"></i>
+                        <span class="font-mono text-xs text-cyan-500 bg-cyan-500/10 px-2 py-1 rounded">VARIABLE</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Geometría Inadecuada</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-cyan-500 rounded-full"></span>Curvas mal diseñadas</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-cyan-500 rounded-full"></span>Peraltes incorrectos</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-cyan-500 rounded-full"></span>Radios insuficientes</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-xs font-mono text-gray-500">CONSECUENCIA: Salida de vía</div>
+                        <div class="mt-2 text-xs text-amber-500">Ver criterios de diseño geométrico →</div>
+                    </div>
+                </div>
+
+                <!-- Riesgo 6 -->
+                <div class="neon-card p-6 rounded-lg group hover:border-pink-500 transition-all" onclick="openModal('riesgo-iluminacion')">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="eye-off" class="text-pink-500 w-8 h-8"></i>
+                        <span class="font-mono text-xs text-pink-500 bg-pink-500/10 px-2 py-1 rounded">ALTO</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Iluminación</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-pink-500 rounded-full"></span>Alumbrado deficiente</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-pink-500 rounded-full"></span>Deslumbramiento</li>
+                        <li class="flex items-center gap-2"><span class="w-1 h-1 bg-pink-500 rounded-full"></span>Sombras en curvas</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-xs font-mono text-gray-500">CONSECUENCIA: Reducción de tiempo de reacción</div>
+                        <div class="mt-2 text-xs text-amber-500">Ver estándares de iluminación →</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 5: PRINCIPIOS DE DISEÑO -->
+    <section id="diseno" class="relative">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="section-title glitch">Principios de Diseño Vial</h2>
+            
+            <div class="space-y-6">
+                <!-- Principio 1 -->
+                <div class="neon-card p-6 rounded-lg flex flex-col md:flex-row gap-6 items-start hover:translate-x-2 transition-transform" onclick="openModal('diseno-superficie')">
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-2xl font-bold text-black font-mono">01</div>
+                    <div class="flex-grow">
+                        <h3 class="text-2xl font-bold text-white mb-2">Superficie Uniforme y Antideslizante</h3>
+                        <p class="text-gray-400 mb-4">El pavimento debe proporcionar fricción adecuada en todo momento, especialmente en condiciones de lluvia.</p>
+                        <div class="grid md:grid-cols-3 gap-3">
+                            <div class="bg-black/30 p-3 rounded border-l-2 border-green-500">
+                                <div class="text-xs font-mono text-green-400 mb-1">✓ HACER</div>
+                                <div class="text-sm text-gray-300">Texturas profundas en zonas de frenado</div>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded border-l-2 border-green-500">
+                                <div class="text-xs font-mono text-green-400 mb-1">✓ HACER</div>
+                                <div class="text-sm text-gray-300">Nivelación perfecta de tapas</div>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded border-l-2 border-red-500">
+                                <div class="text-xs font-mono text-red-400 mb-1">✗ EVITAR</div>
+                                <div class="text-sm text-gray-300">Superficies pulidas o metálicas</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-cyan-400 font-mono">Ver especificaciones técnicas completas →</div>
+                    </div>
+                </div>
+
+                <!-- Principio 2 -->
+                <div class="neon-card p-6 rounded-lg flex flex-col md:flex-row gap-6 items-start hover:translate-x-2 transition-transform" onclick="openModal('diseno-obstaculos')">
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-2xl font-bold text-black font-mono">02</div>
+                    <div class="flex-grow">
+                        <h3 class="text-2xl font-bold text-white mb-2">Eliminación de Obstáculos</h3>
+                        <p class="text-gray-400 mb-4">Zona de recuperación libre de elementos rígidos que permita corrección de trayectoria sin consecuencias graves.</p>
+                        <div class="flex gap-4 mt-4">
+                            <div class="flex-1 bg-gradient-to-r from-cyan-500/20 to-transparent p-4 rounded border border-cyan-500/30">
+                                <div class="text-3xl font-bold text-cyan-400 font-mono">1.5m</div>
+                                <div class="text-xs text-gray-400">Distancia mínima lateral libre</div>
+                            </div>
+                            <div class="flex-1 bg-gradient-to-r from-cyan-500/20 to-transparent p-4 rounded border border-cyan-500/30">
+                                <div class="text-3xl font-bold text-cyan-400 font-mono">4m</div>
+                                <div class="text-xs text-gray-400">Zona de recuperación ideal</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-cyan-400 font-mono">Ver normativas internacionales →</div>
+                    </div>
+                </div>
+
+                <!-- Principio 3 -->
+                <div class="neon-card p-6 rounded-lg flex flex-col md:flex-row gap-6 items-start hover:translate-x-2 transition-transform" onclick="openModal('diseno-visibilidad')">
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-2xl font-bold text-black font-mono">03</div>
+                    <div class="flex-grow">
+                        <h3 class="text-2xl font-bold text-white mb-2">Visibilidad y Legibilidad</h3>
+                        <p class="text-gray-400 mb-4">El trazado debe permitir anticipar conflictos con tiempo suficiente para reacción y maniobra evasiva.</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
+                                    <i data-lucide="check-circle" class="text-green-500 w-4 h-4"></i>
+                                    Distancia de visibilidad de parada (DPS)
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
+                                    <i data-lucide="check-circle" class="text-green-500 w-4 h-4"></i>
+                                    Conos de visión libre en intersecciones
+                                </div>
+                            </div>
+                            <div class="bg-purple-500/10 p-3 rounded border border-purple-500/30">
+                                <div class="text-xs font-mono text-purple-400 mb-1">DATO CRÍTICO</div>
+                                <div class="text-sm text-white">A 60km/h, 1 segundo = 16.6 metros de recorrido</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-cyan-400 font-mono">Ver cálculos de visibilidad →</div>
+                    </div>
+                </div>
+
+                <!-- Principio 4 -->
+                <div class="neon-card p-6 rounded-lg flex flex-col md:flex-row gap-6 items-start hover:translate-x-2 transition-transform" onclick="openModal('diseno-velocidad')">
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-2xl font-bold text-black font-mono">04</div>
+                    <div class="flex-grow">
+                        <h3 class="text-2xl font-bold text-white mb-2">Gestión de Velocidad</h3>
+                        <p class="text-gray-400 mb-4">Diseño que induzca velocidades seguras mediante elementos de calmado de tráfico compatibles con motocicletas.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-green-500/20 border border-green-500/50 rounded-full text-xs text-green-400 font-mono">Reductores tipo mesa</span>
+                            <span class="px-3 py-1 bg-green-500/20 border border-green-500/50 rounded-full text-xs text-green-400 font-mono">Estrechamientos visuales</span>
+                            <span class="px-3 py-1 bg-red-500/20 border border-red-500/50 rounded-full text-xs text-red-400 font-mono">Evitar: Lomos de burro altos</span>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-cyan-400 font-mono">Ver catálogo de elementos →</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 6: EVALUACIÓN INTERACTIVA -->
+    <section id="evaluacion" class="relative">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="section-title glitch">Matriz de Evaluación</h2>
+            <p class="text-gray-400 mb-8">Herramienta de diagnóstico rápido. Califica cada dimensión de 0 (crítico) a 4 (óptimo). <span class="text-amber-500">Al completar, se generarán recomendaciones personalizadas.</span></p>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Panel de control -->
+                <div class="lg:col-span-2 space-y-4" id="matrix-container">
+                    <!-- Pavimento -->
+                    <div class="neon-card p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-3 cursor-pointer" onclick="toggleCategory('pavimento')">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="layout-grid" class="text-amber-500"></i>
+                                Pavimento
+                            </h3>
+                            <i data-lucide="chevron-down" class="text-gray-500 transform transition-transform" id="icon-pavimento"></i>
+                        </div>
+                        <div id="category-pavimento" class="space-y-2">
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Estado de superficie</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('pav1', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="pav1-0">0</button>
+                                    <button onclick="setScore('pav1', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="pav1-1">1</button>
+                                    <button onclick="setScore('pav1', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="pav1-2">2</button>
+                                    <button onclick="setScore('pav1', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="pav1-3">3</button>
+                                    <button onclick="setScore('pav1', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="pav1-4">4</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Baches/defectos</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('pav2', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="pav2-0">0</button>
+                                    <button onclick="setScore('pav2', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="pav2-1">1</button>
+                                    <button onclick="setScore('pav2', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="pav2-2">2</button>
+                                    <button onclick="setScore('pav2', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="pav2-3">3</button>
+                                    <button onclick="setScore('pav2', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="pav2-4">4</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Drenaje superficial</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('pav3', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="pav3-0">0</button>
+                                    <button onclick="setScore('pav3', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="pav3-1">1</button>
+                                    <button onclick="setScore('pav3', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="pav3-2">2</button>
+                                    <button onclick="setScore('pav3', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="pav3-3">3</button>
+                                    <button onclick="setScore('pav3', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="pav3-4">4</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Geometría -->
+                    <div class="neon-card p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-3 cursor-pointer" onclick="toggleCategory('geo')">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="move" class="text-cyan-400"></i>
+                                Geometría
+                            </h3>
+                            <i data-lucide="chevron-down" class="text-gray-500 transform transition-transform" id="icon-geo"></i>
+                        </div>
+                        <div id="category-geo" class="space-y-2 hidden">
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Radio de curva</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('geo1', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="geo1-0">0</button>
+                                    <button onclick="setScore('geo1', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="geo1-1">1</button>
+                                    <button onclick="setScore('geo1', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="geo1-2">2</button>
+                                    <button onclick="setScore('geo1', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="geo1-3">3</button>
+                                    <button onclick="setScore('geo1', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="geo1-4">4</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Peralte adecuado</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('geo2', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="geo2-0">0</button>
+                                    <button onclick="setScore('geo2', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="geo2-1">1</button>
+                                    <button onclick="setScore('geo2', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="geo2-2">2</button>
+                                    <button onclick="setScore('geo2', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="geo2-3">3</button>
+                                    <button onclick="setScore('geo2', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="geo2-4">4</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Ancho de carril</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('geo3', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="geo3-0">0</button>
+                                    <button onclick="setScore('geo3', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="geo3-1">1</button>
+                                    <button onclick="setScore('geo3', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="geo3-2">2</button>
+                                    <button onclick="setScore('geo3', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="geo3-3">3</button>
+                                    <button onclick="setScore('geo3', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="geo3-4">4</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intersecciones -->
+                    <div class="neon-card p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-3 cursor-pointer" onclick="toggleCategory('inter')">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="git-pull-request" class="text-purple-500"></i>
+                                Intersecciones
+                            </h3>
+                            <i data-lucide="chevron-down" class="text-gray-500 transform transition-transform" id="icon-inter"></i>
+                        </div>
+                        <div id="category-inter" class="space-y-2 hidden">
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Visibilidad</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('int1', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="int1-0">0</button>
+                                    <button onclick="setScore('int1', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="int1-1">1</button>
+                                    <button onclick="setScore('int1', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="int1-2">2</button>
+                                    <button onclick="setScore('int1', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="int1-3">3</button>
+                                    <button onclick="setScore('int1', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="int1-4">4</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Señalización</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('int2', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="int2-0">0</button>
+                                    <button onclick="setScore('int2', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="int2-1">1</button>
+                                    <button onclick="setScore('int2', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="int2-2">2</button>
+                                    <button onclick="setScore('int2', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="int2-3">3</button>
+                                    <button onclick="setScore('int2', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="int2-4">4</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seguridad Lateral -->
+                    <div class="neon-card p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-3 cursor-pointer" onclick="toggleCategory('lat')">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="shield-alert" class="text-red-500"></i>
+                                Seguridad Lateral
+                            </h3>
+                            <i data-lucide="chevron-down" class="text-gray-500 transform transition-transform" id="icon-lat"></i>
+                        </div>
+                        <div id="category-lat" class="space-y-2 hidden">
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Obstáculos</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('lat1', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="lat1-0">0</button>
+                                    <button onclick="setScore('lat1', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="lat1-1">1</button>
+                                    <button onclick="setScore('lat1', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="lat1-2">2</button>
+                                    <button onclick="setScore('lat1', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="lat1-3">3</button>
+                                    <button onclick="setScore('lat1', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="lat1-4">4</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-5 gap-2 items-center">
+                                <span class="text-sm text-gray-400 col-span-2">Tipo de barreras</span>
+                                <div class="col-span-3 flex gap-1">
+                                    <button onclick="setScore('lat2', 0)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-red-500/50 text-xs" id="lat2-0">0</button>
+                                    <button onclick="setScore('lat2', 1)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-orange-500/50 text-xs" id="lat2-1">1</button>
+                                    <button onclick="setScore('lat2', 2)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-yellow-500/50 text-xs" id="lat2-2">2</button>
+                                    <button onclick="setScore('lat2', 3)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-lime-500/50 text-xs" id="lat2-3">3</button>
+                                    <button onclick="setScore('lat2', 4)" class="matrix-btn w-8 h-8 rounded bg-gray-800 hover:bg-green-500/50 text-xs" id="lat2-4">4</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel de resultados -->
+                <div class="lg:col-span-1">
+                    <div class="neon-card p-6 rounded-lg sticky top-8">
+                        <h3 class="text-lg font-bold text-white mb-4 font-mono">RESULTADO</h3>
+                        
+                        <div class="flex justify-center mb-6">
+                            <div class="circular-progress">
+                                <svg width="120" height="120">
+                                    <circle class="bg" cx="60" cy="60" r="52"></circle>
+                                    <circle class="progress" cx="60" cy="60" r="52" stroke-dasharray="326.72" stroke-dashoffset="326.72" id="progress-circle"></circle>
+                                </svg>
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                                    <div class="text-3xl font-bold text-white font-mono" id="total-score">0.0</div>
+                                    <div class="text-xs text-gray-500">/ 4.0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Pavimento</span>
+                                <span class="font-mono text-amber-500" id="cat-pavimento">0.0</span>
+                            </div>
+                            <div class="w-full bg-gray-800 h-1 rounded-full">
+                                <div class="bg-amber-500 h-1 rounded-full transition-all" style="width: 0%" id="bar-pavimento"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Geometría</span>
+                                <span class="font-mono text-cyan-400" id="cat-geo">0.0</span>
+                            </div>
+                            <div class="w-full bg-gray-800 h-1 rounded-full">
+                                <div class="bg-cyan-400 h-1 rounded-full transition-all" style="width: 0%" id="bar-geo"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Intersecciones</span>
+                                <span class="font-mono text-purple-400" id="cat-inter">0.0</span>
+                            </div>
+                            <div class="w-full bg-gray-800 h-1 rounded-full">
+                                <div class="bg-purple-400 h-1 rounded-full transition-all" style="width: 0%" id="bar-inter"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Seguridad Lateral</span>
+                                <span class="font-mono text-red-400" id="cat-lat">0.0</span>
+                            </div>
+                            <div class="w-full bg-gray-800 h-1 rounded-full">
+                                <div class="bg-red-400 h-1 rounded-full transition-all" style="width: 0%" id="bar-lat"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded bg-black/40 border border-gray-700" id="result-message">
+                            <div class="text-xs font-mono text-gray-500 mb-1">DIAGNÓSTICO</div>
+                            <div class="text-sm text-white">Complete la evaluación para obtener resultado</div>
+                        </div>
+
+                        <button onclick="resetEvaluation()" class="w-full mt-4 py-2 border border-gray-600 text-gray-400 hover:border-white hover:text-white transition-all text-xs font-mono uppercase">
+                            Reiniciar Evaluación
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE RECOMENDACIONES -->
+            <div id="recommendations-section" class="mt-12 hidden">
+                <div class="neon-card p-8 rounded-lg border-2 border-cyan-400/50">
+                    <h3 class="text-2xl font-bold text-cyan-400 font-mono mb-6 flex items-center gap-3">
+                        <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+                        PLAN DE INTERVENCIÓN RECOMENDADO
+                    </h3>
+                    <div id="recommendations-list" class="space-y-4">
+                        <!-- Las recomendaciones se generarán dinámicamente aquí -->
+                    </div>
+                    
+                    <div class="mt-8 p-6 bg-black/40 rounded-lg border border-amber-500/30">
+                        <h4 class="text-lg font-bold text-amber-500 font-mono mb-3">PRIORIZACIÓN DE INVERSIÓN</h4>
+                        <div class="grid md:grid-cols-3 gap-4 text-sm">
+                            <div class="text-center p-3 bg-red-500/10 rounded border border-red-500/30">
+                                <div class="text-red-400 font-bold mb-1">CORTO PLAZO</div>
+                                <div class="text-gray-400" id="prioridad-corto">-</div>
+                            </div>
+                            <div class="text-center p-3 bg-yellow-500/10 rounded border border-yellow-500/30">
+                                <div class="text-yellow-400 font-bold mb-1">MEDIANO PLAZO</div>
+                                <div class="text-gray-400" id="prioridad-medio">-</div>
+                            </div>
+                            <div class="text-center p-3 bg-green-500/10 rounded border border-green-500/30">
+                                <div class="text-green-400 font-bold mb-1">LARGO PLAZO</div>
+                                <div class="text-gray-400" id="prioridad-largo">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex gap-4">
+                        <button onclick="exportReport()" class="flex-1 btn-industrial py-3 text-sm">
+                            <i data-lucide="download" class="inline w-4 h-4 mr-2"></i>
+                            Exportar Informe
+                        </button>
+                        <button onclick="shareResults()" class="flex-1 btn-industrial py-3 text-sm border-cyan-400 text-cyan-400" style="--neon-amber: #00F0FF;">
+                            <i data-lucide="share-2" class="inline w-4 h-4 mr-2"></i>
+                            Compartir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 7: HERRAMIENTAS -->
+    <section id="herramientas" class="relative pb-20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="section-title glitch">Herramientas Digitales</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="neon-card p-8 rounded-lg" onclick="openModal('herramienta-georef')">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                            <i data-lucide="map-pin" class="text-cyan-400 w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Auditorías Georreferenciadas</h3>
+                            <p class="text-sm text-gray-400">Sistema de mapeo de riesgos</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="text-cyan-400 w-4 h-4"></i>
+                            Registro GPS de puntos críticos
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="text-cyan-400 w-4 h-4"></i>
+                            Fotografías geotagged
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="text-cyan-400 w-4 h-4"></i>
+                            Exportación a GIS
+                        </li>
+                    </ul>
+                    <div class="mt-4 text-right text-xs text-cyan-400 font-mono">Ver tutorial de uso →</div>
+                </div>
+
+                <div class="neon-card p-8 rounded-lg" onclick="openModal('herramienta-analisis')">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                            <i data-lucide="bar-chart-3" class="text-amber-500 w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Análisis Territorial</h3>
+                            <p class="text-sm text-gray-400">Visualización de datos</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="text-amber-500 w-4 h-4"></i>
+                            Heatmaps de siniestralidad
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="text-amber-500 w-4 h-4"></i>
+                            Correlación infraestructura-accidentes
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="text-amber-500 w-4 h-4"></i>
+                            Priorización de intervenciones
+                        </li>
+                    </ul>
+                    <div class="mt-4 text-right text-xs text-cyan-400 font-mono">Ver casos de estudio →</div>
+                </div>
+            </div>
+
+            <div class="neon-card p-8 rounded-lg text-center" onclick="openModal('politicas-publicas')">
+                <h3 class="text-2xl font-bold text-white mb-4 font-mono">Implementación de Políticas Públicas</h3>
+                <div class="grid md:grid-cols-4 gap-4 mt-8">
+                    <div class="p-4 border border-gray-700 rounded hover:border-amber-500 transition-all">
+                        <div class="text-3xl mb-2">📋</div>
+                        <div class="text-sm font-bold text-white">Auditorías Periódicas</div>
+                        <div class="text-xs text-gray-500 mt-1">Programas sistemáticos de evaluación</div>
+                    </div>
+                    <div class="p-4 border border-gray-700 rounded hover:border-amber-500 transition-all">
+                        <div class="text-3xl mb-2">🔧</div>
+                        <div class="text-sm font-bold text-white">Mantenimiento Prioritario</div>
+                        <div class="text-xs text-gray-500 mt-1">Corredores motociclistas críticos</div>
+                    </div>
+                    <div class="p-4 border border-gray-700 rounded hover:border-amber-500 transition-all">
+                        <div class="text-3xl mb-2">🏗️</div>
+                        <div class="text-sm font-bold text-white">Diseño Inclusivo</div>
+                        <div class="text-xs text-gray-500 mt-1">Guías técnicas actualizadas</div>
+                    </div>
+                    <div class="p-4 border border-gray-700 rounded hover:border-amber-500 transition-all">
+                        <div class="text-3xl mb-2">📊</div>
+                        <div class="text-sm font-bold text-white">Monitoreo de Datos</div>
+                        <div class="text-xs text-gray-500 mt-1">Indicadores de desempeño</div>
+                    </div>
+                </div>
+                <div class="mt-6 text-xs text-cyan-400 font-mono">Click para ver roadmap de implementación →</div>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 w-full warning-stripes"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black/80 border-t border-gray-800 py-12">
+        <div class="container mx-auto max-w-6xl px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <div class="text-2xl font-black text-amber-500 font-mono mb-2">SM4A4L</div>
+                    <div class="text-sm text-gray-500">Safe Mobility for All and for Life</div>
+                    <div class="text-xs text-gray-600 mt-1">Automóvil Club Argentino</div>
+                </div>
+                <div class="flex gap-6">
+                    <a href="#" class="text-gray-500 hover:text-amber-500 transition-colors">
+                        <i data-lucide="github" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-amber-500 transition-colors">
+                        <i data-lucide="twitter" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-amber-500 transition-colors">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-xs text-gray-600 font-mono">
+                <p>Manual Técnico v2.0 | Infraestructura Segura con Perspectiva Motociclista</p>
+                <p class="mt-2">© 2024 - Todos los derechos reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Base de datos de contenido expandido para modales
+        const modalContent = {
+            'hero-stats': {
+                title: 'Estadísticas del Sistema Vial',
+                content: `
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-black/30 p-4 rounded border border-amber-500/30">
+                                <h4 class="text-amber-500 font-bold mb-2">Distribución de Fatalidades</h4>
+                                <ul class="space-y-2 text-sm text-gray-300">
+                                    <li>• Motociclistas: 23%</li>
+                                    <li>• Peatones: 22%</li>
+                                    <li>• Ocupantes autos: 35%</li>
+                                    <li>• Otros: 20%</li>
+                                </ul>
+                            </div>
+                            <div class="bg-black/30 p-4 rounded border border-cyan-400/30">
+                                <h4 class="text-cyan-400 font-bold mb-2">Crecimiento Regional</h4>
+                                <ul class="space-y-2 text-sm text-gray-300">
+                                    <li>• Brasil: +85%</li>
+                                    <li>• Argentina: +65%</li>
+                                    <li>• Colombia: +92%</li>
+                                    <li>• México: +78%</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bg-amber-500/10 p-4 rounded border border-amber-500/30">
+                            <h4 class="text-amber-500 font-bold mb-2">Brecha Crítica</h4>
+                            <p class="text-sm text-gray-300">Solo el 12% de la infraestructura vial en América Latina cuenta con adaptaciones específicas para motociclistas, mientras que el 45% del tráfico urbano corresponde a motos.</p>
+                        </div>
+                    </div>
+                `
+            },
+            'riesgo-5x': {
+                title: 'Análisis de Riesgo Comparativo',
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-gray-300">Los motociclistas tienen <span class="text-amber-500 font-bold">5 veces más probabilidades</span> de sufrir lesiones fatales que los ocupantes de automóviles en el mismo siniestro.</p>
+                        
+                        <h4 class="text-cyan-400 font-bold mt-4">Factores de Vulnerabilidad:</h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500">▸</span>
+                                <span><strong>Exposición:</strong> Sin carrocería protectora que absorba impacto</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500">▸</span>
+                                <span><strong>Estabilidad:</strong> Dos ruedas = mayor riesgo de caída</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500">▸</span>
+                                <span><strong>Tamaño:</strong> Menor visibilidad para otros usuarios</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-red-500">▸</span>
+                                <span><strong>Protección:</strong> Dependencia total del equipo personal</span>
+                            </li>
+                        </ul>
+
+                        <div class="bg-cyan-500/10 p-4 rounded border border-cyan-500/30 mt-4">
+                            <h4 class="text-cyan-400 font-bold mb-2">Dato Técnico</h4>
+                            <p class="text-sm text-gray-300">La energía cinética en un impacto a 50 km/h es equivalente a caer desde un tercer piso. Sin estructura de absorción, el cuerpo humano recibe el 100% de la energía.</p>
+                        </div>
+                    </div>
+                `
+            },
+            'riesgo-pavimento': {
+                title: 'Protocolo: Pavimento Deficiente',
+                content: `
+                    <div class="space-y-4">
+                        <div class="bg-red-500/10 border border-red-500/30 p-4 rounded">
+                            <h4 class="text-red-400 font-bold mb-2">⚠ Riesgo Crítico</h4>
+                            <p class="text-sm text-gray-300">Irregularidades >2cm pueden causar pérdida de control a velocidades >40km/h</p>
+                        </div>
+
+                        <h4 class="text-amber-500 font-bold">Checklist de Inspección:</h4>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2 text-sm text-gray-300">
+                                    <input type="checkbox" class="accent-amber-500"> Baches profundos (>3cm)
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-gray-300">
+                                    <input type="checkbox" class="accent-amber-500"> Grietas longitudinales
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-gray-300">
+                                    <input type="checkbox" class="accent-amber-500"> Superficies pulimentadas
+                                </label>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2 text-sm text-gray-300">
+                                    <input type="checkbox" class="accent-amber-500"> Tapas desniveladas (>1cm)
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-gray-300">
+                                    <input type="checkbox" class="accent-amber-500"> Derrames de aceite
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-gray-300">
+                                    <input type="checkbox" class="accent-amber-500"> Superposición de parches
+                                </label>
+                            </div>
+                        </div>
+
+                        <h4 class="text-cyan-400 font-bold mt-4">Soluciones Técnicas:</h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li>• <strong>Microaglomerado:</strong> Reparación de baches <5cm profundidad</li>
+                            <li>• <strong>Revestimiento antideslizante:</strong> Textura profunda en zonas críticas</li>
+                            <li>• <strong>Anillos de nivelación:</strong> Para tapas de servicios</li>
+                            <li>• <strong>Marcas viales en relieve:</strong> Termoplástico estructurado</li>
+                        </ul>
+                    </div>
+                `
+            },
+            'riesgo-senalizacion': {
+                title: 'Especificaciones: Señalización Segura',
+                content: `
+                    <div class="space-y-4">
+                        <h4 class="text-amber-500 font-bold">Requisitos para Motociclistas:</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded border-l-4 border-green-500">
+                                <h5 class="text-green-400 font-bold text-sm">✓ Pintura Termoplástica Estructurada</h5>
+                                <p class="text-xs text-gray-400 mt-1">Espesor 2-3mm con vidrio triturado incorporado. Coeficiente de fricción >0.55</p>
+                            </div>
+                            
+                            <div class="bg-black/30 p-3 rounded border-l-4 border-green-500">
+                                <h5 class="text-green-400 font-bold text-sm">✓ Señales Verticales Retroreflectivas</h5>
+                                <p class="text-xs text-gray-400 mt-1">Clase IV (diamante). Ángulo de visibilidad 120°</p>
+                            </div>
+                            
+                            <div class="bg-black/30 p-3 rounded border-l-4 border-red-500">
+                                <h5 class="text-red-400 font-bold text-sm">✗ Pintura Plana Tradicional</h5>
+                                <p class="text-xs text-gray-400 mt-1">Peligrosa en condiciones húmedas. Coeficiente <0.3</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-cyan-500/10 p-4 rounded border border-cyan-500/30 mt-4">
+                            <h4 class="text-cyan-400 font-bold mb-2">Ubicación Crítica</h4>
+                            <p class="text-sm text-gray-300">Las marcas viales en curvas deben ubicarse fuera de la trayectoria de rodado de motocicletas (zona central del carril), preferentemente en el eje de ruedas de vehículos pesados.</p>
+                        </div>
+                    </div>
+                `
+            },
+            'diseno-superficie': {
+                title: 'Especificación Técnica: Superficie Antideslizante',
+                content: `
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-black/30 p-4 rounded">
+                                <h4 class="text-amber-500 font-bold text-sm mb-2">Coeficiente de Fricción</h4>
+                                <div class="text-3xl font-mono text-white">≥ 0.55</div>
+                                <div class="text-xs text-gray-500">Valor mínimo en seco</div>
+                            </div>
+                            <div class="bg-black/30 p-4 rounded">
+                                <h4 class="text-cyan-400 font-bold text-sm mb-2">Rugosidad</h4>
+                                <div class="text-3xl font-mono text-white">0.8-1.2mm</div>
+                                <div class="text-xs text-gray-500">Profundidad de textura</div>
+                            </div>
+                        </div>
+
+                        <h4 class="text-white font-bold mt-4">Tratamientos Superficiales:</h4>
+                        <table class="w-full text-sm text-left text-gray-300 mt-2">
+                            <thead class="text-xs text-gray-500 uppercase bg-black/30">
+                                <tr>
+                                    <th class="px-3 py-2">Tipo</th>
+                                    <th class="px-3 py-2">Aplicación</th>
+                                    <th class="px-3 py-2">Durabilidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-700">
+                                    <td class="px-3 py-2">Microaglomerado</td>
+                                    <td class="px-3 py-2">Zonas urbanas</td>
+                                    <td class="px-3 py-2 text-green-400">5-7 años</td>
+                                </tr>
+                                <tr class="border-b border-gray-700">
+                                    <td class="px-3 py-2">Riego de sellado</td>
+                                    <td class="px-3 py-2">Prevención</td>
+                                    <td class="px-3 py-2 text-yellow-400">3-4 años</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2">Reciclado en frío</td>
+                                    <td class="px-3 py-2">Rehabilitación</td>
+                                    <td class="px-3 py-2 text-green-400">8-10 años</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `
+            },
+            'principios-fundamentales': {
+                title: 'Metodología del Sistema Seguro',
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-gray-300">El Enfoque de Sistema Seguro reconoce que los humanos cometen errores y que el cuerpo humano tiene límites físicos de tolerancia.</p>
+                        
+                        <h4 class="text-cyan-400 font-bold">Principios Fundamentales:</h4>
+                        <ol class="space-y-3 text-sm text-gray-300 list-decimal list-inside">
+                            <li><strong class="text-white">Tolerancia al Error:</strong> La infraestructura debe diseñarse asumiendo que los usuarios cometerán errores.</li>
+                            <li><strong class="text-white">Límites Fisiológicos:</strong> La energía de impacto no debe exceder lo que el cuerpo humano puede tolerar (generalmente <30 km/h para peatones y motociclistas).</li>
+                            <li><strong class="text-white">Responsabilidad Compartida:</strong> Todos los actores del sistema (planificadores, ingenieros, usuarios) comparten la responsabilidad de la seguridad.</li>
+                        </ol>
+
+                        <div class="bg-amber-500/10 p-4 rounded border border-amber-500/30 mt-4">
+                            <h4 class="text-amber-500 font-bold mb-2">Aplicación para Motociclistas</h4>
+                            <p class="text-sm text-gray-300">Diseñar infraestructura "perdonable" donde los errores de conducción no resulten en lesiones graves. Esto incluye zonas de recuperación, superficies antideslizantes y ausencia de obstáculos rígidos.</p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // Inicializar iconos
+        lucide.createIcons();
+
+        // Datos de evaluación
+        let scores = {
+            pav1: null, pav2: null, pav3: null,
+            geo1: null, geo2: null, geo3: null,
+            int1: null, int2: null,
+            lat1: null, lat2: null
+        };
+
+        // Funciones de Modal
+        function openModal(contentId) {
+            const modal = document.getElementById('infoModal');
+            const modalBody = document.getElementById('modalBody');
+        // Funciones de Modal
+        function openModal(contentId) {
+            const modal = document.getElementById('infoModal');
+            const modalBody = document.getElementById('modalBody');
+
+            const content = modalContent[contentId] || {
+                title: 'Información no disponible',
+                content: '<p class="text-gray-400">El contenido solicitado no está disponible en este momento.</p>'
+            };
+
+            modalBody.innerHTML = `
+                <h2 class="text-2xl font-bold text-amber-500 font-mono mb-4">${content.title}</h2>
+                ${content.content}
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget && event.target.closest('.modal-content')) {
+                return;
+            }
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Navegación suave
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                updateActiveNav(sectionId);
+            }
+        }
+
+        function updateActiveNav(activeId) {
+            document.querySelectorAll('.nav-dot').forEach(dot => {
+                dot.classList.remove('active');
+                const onclick = dot.getAttribute('onclick');
+                if (onclick && onclick.includes(activeId)) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        // Toggle categorías en la matriz
+        function toggleCategory(category) {
+            const content = document.getElementById(`category-${category}`);
+            const icon = document.getElementById(`icon-${category}`);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Sistema de puntuación
+        function setScore(criterion, value) {
+            scores[criterion] = value;
+
+            // Actualizar UI de botones
+            for (let i = 0; i <= 4; i++) {
+                const btn = document.getElementById(`${criterion}-${i}`);
+                if (btn) {
+                    if (i === value) {
+                        btn.classList.add('active');
+                        btn.style.background = getColorForScore(value);
+                        btn.style.color = '#000';
+                        btn.style.fontWeight = 'bold';
+                    } else {
+                        btn.classList.remove('active');
+                        btn.style.background = 'rgba(31, 41, 55, 1)';
+                        btn.style.color = '';
+                        btn.style.fontWeight = '';
+                    }
+                }
+            }
+
+            calculateResults();
+        }
+
+        function getColorForScore(score) {
+            const colors = {
+                0: '#EF4444', // Rojo
+                1: '#F97316', // Naranja
+                2: '#EAB308', // Amarillo
+                3: '#84CC16', // Lima
+                4: '#22C55E'  // Verde
+            };
+            return colors[score] || '#6B7280';
+        }
+
+        function calculateResults() {
+            // Calcular promedios por categoría
+            const categories = {
+                pavimento: ['pav1', 'pav2', 'pav3'],
+                geo: ['geo1', 'geo2', 'geo3'],
+                inter: ['int1', 'int2'],
+                lat: ['lat1', 'lat2']
+            };
+
+            let totalSum = 0;
+            let totalCount = 0;
+
+            for (const [cat, items] of Object.entries(categories)) {
+                let catSum = 0;
+                let catCount = 0;
+
+                items.forEach(item => {
+                    if (scores[item] !== null) {
+                        catSum += scores[item];
+                        catCount++;
+                    }
+                });
+
+                const catAvg = catCount > 0 ? (catSum / catCount).toFixed(1) : '0.0';
+                const catElement = document.getElementById(`cat-${cat}`);
+                const barElement = document.getElementById(`bar-${cat}`);
+
+                if (catElement) catElement.textContent = catAvg;
+                if (barElement) barElement.style.width = `${(catAvg / 4) * 100}%`;
+
+                totalSum += catSum;
+                totalCount += catCount;
+            }
+
+            // Calcular total
+            const totalAvg = totalCount > 0 ? (totalSum / totalCount).toFixed(1) : '0.0';
+            const totalElement = document.getElementById('total-score');
+            if (totalElement) totalElement.textContent = totalAvg;
+
+            // Actualizar círculo de progreso
+            const circle = document.getElementById('progress-circle');
+            if (circle) {
+                const circumference = 326.72;
+                const offset = circumference - ((totalAvg / 4) * circumference);
+                circle.style.strokeDashoffset = offset;
+            }
+
+            // Actualizar mensaje de resultado
+            updateResultMessage(parseFloat(totalAvg), totalCount);
+
+            // Generar recomendaciones si hay suficientes datos
+            if (totalCount >= 5) {
+                generateRecommendations();
+            }
+        }
+
+        function updateResultMessage(score, count) {
+            const msgDiv = document.getElementById('result-message');
+            if (!msgDiv) return;
+
+            let diagnosis = '';
+            let colorClass = '';
+
+            if (count === 0) {
+                diagnosis = 'Complete la evaluación para obtener resultado';
+                colorClass = 'text-gray-500';
+            } else if (score < 1.5) {
+                diagnosis = '⚠ CRÍTICO: Intervención inmediata requerida';
+                colorClass = 'text-red-500';
+            } else if (score < 2.5) {
+                diagnosis = '⚠ REGULAR: Mejoras prioritarias necesarias';
+                colorClass = 'text-yellow-500';
+            } else if (score < 3.5) {
+                diagnosis = '✓ ACEPTABLE: Optimizaciones recomendadas';
+                colorClass = 'text-lime-500';
+            } else {
+                diagnosis = '✓ ÓPTIMO: Mantenimiento preventivo';
+                colorClass = 'text-green-500';
+            }
+
+            msgDiv.innerHTML = `
+                <div class="text-xs font-mono text-gray-500 mb-1">DIAGNÓSTICO (${count}/10 evaluados)</div>
+                <div class="text-sm ${colorClass} font-bold">${diagnosis}</div>
+            `;
+        }
+
+        function generateRecommendations() {
+            const recommendations = [];
+
+            // Analizar pavimento
+            const pavScores = [scores.pav1, scores.pav2, scores.pav3].filter(s => s !== null);
+            if (pavScores.length > 0) {
+                const pavAvg = pavScores.reduce((a, b) => a + b, 0) / pavScores.length;
+                if (pavAvg < 2) {
+                    recommendations.push({
+                        priority: 'high',
+                        title: 'Rehabilitación de Pavimento',
+                        desc: 'Implementar microaglomerado en zonas críticas y nivelación de tapas de servicios.',
+                        timeframe: 'corto'
+                    });
+                } else if (pavAvg < 3) {
+                    recommendations.push({
+                        priority: 'medium',
+                        title: 'Tratamiento Superficial',
+                        desc: 'Aplicar riego de sellado y marcas viales antideslizantes.',
+                        timeframe: 'medio'
+                    });
+                }
+            }
+
+            // Analizar geometría
+            const geoScores = [scores.geo1, scores.geo2, scores.geo3].filter(s => s !== null);
+            if (geoScores.length > 0) {
+                const geoAvg = geoScores.reduce((a, b) => a + b, 0) / geoScores.length;
+                if (geoAvg < 2) {
+                    recommendations.push({
+                        priority: 'high',
+                        title: 'Rediseño Geométrico',
+                        desc: 'Corregir radios de curva y peraltes inadecuados. Instalar señalización preventiva.',
+                        timeframe: 'medio'
+                    });
+                }
+            }
+
+            // Analizar intersecciones
+            const intScores = [scores.int1, scores.int2].filter(s => s !== null);
+            if (intScores.length > 0) {
+                const intAvg = intScores.reduce((a, b) => a + b, 0) / intScores.length;
+                if (intAvg < 2) {
+                    recommendations.push({
+                        priority: 'high',
+                        title: 'Intervención en Intersecciones',
+                        desc: 'Instalar refugios peatonales, mejorar visibilidad y señalización vertical.',
+                        timeframe: 'corto'
+                    });
+                }
+            }
+
+            // Analizar seguridad lateral
+            const latScores = [scores.lat1, scores.lat2].filter(s => s !== null);
+            if (latScores.length > 0) {
+                const latAvg = latScores.reduce((a, b) => a + b, 0) / latScores.length;
+                if (latAvg < 2) {
+                    recommendations.push({
+                        priority: 'medium',
+                        title: 'Protección Lateral',
+                        desc: 'Instalar barreras tipo motociclista o eliminar obstáculos rígidos.',
+                        timeframe: 'medio'
+                    });
+                }
+            }
+
+            // Si todo está bien
+            if (recommendations.length === 0) {
+                recommendations.push({
+                    priority: 'low',
+                    title: 'Mantenimiento Preventivo',
+                    desc: 'Continuar con inspecciones periódicas y conservación rutinaria.',
+                    timeframe: 'largo'
+                });
+            }
+
+            // Renderizar recomendaciones
+            renderRecommendations(recommendations);
+        }
+
+        function renderRecommendations(recs) {
+            const container = document.getElementById('recommendations-section');
+            const list = document.getElementById('recommendations-list');
+
+            if (!container || !list) return;
+
+            const priorityLabels = {
+                high: { text: 'ALTA', color: 'text-red-500', border: 'border-red-500' },
+                medium: { text: 'MEDIA', color: 'text-yellow-500', border: 'border-yellow-500' },
+                low: { text: 'BAJA', color: 'text-green-500', border: 'border-green-500' }
+            };
+
+            list.innerHTML = recs.map((rec, index) => `
+                <div class="recommendation-card recommendation-animate priority-${rec.priority}" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="text-lg font-bold text-white">${rec.title}</h4>
+                        <span class="text-xs font-mono ${priorityLabels[rec.priority].color} border ${priorityLabels[rec.priority].border} px-2 py-1 rounded">
+                            PRIORIDAD ${priorityLabels[rec.priority].text}
+                        </span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-2">${rec.desc}</p>
+                    <div class="text-xs text-cyan-400 font-mono">Plazo: ${getTimeframeText(rec.timeframe)}</div>
+                </div>
+            `).join('');
+
+            // Actualizar prioridades de inversión
+            updateInvestmentPriorities(recs);
+
+            container.classList.remove('hidden');
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function getTimeframeText(tf) {
+            const texts = {
+                corto: '0-6 meses',
+                medio: '6-18 meses',
+                largo: '18+ meses'
+            };
+            return texts[tf] || 'Por definir';
+        }
+
+        function updateInvestmentPriorities(recs) {
+            const cortoEl = document.getElementById('prioridad-corto');
+            const medioEl = document.getElementById('prioridad-medio');
+            const largoEl = document.getElementById('prioridad-largo');
+
+            const corto = recs.filter(r => r.timeframe === 'corto').map(r => r.title).join(', ') || 'Ninguna';
+            const medio = recs.filter(r => r.timeframe === 'medio').map(r => r.title).join(', ') || 'Ninguna';
+            const largo = recs.filter(r => r.timeframe === 'largo').map(r => r.title).join(', ') || 'Mantenimiento rutinario';
+
+            if (cortoEl) cortoEl.textContent = corto;
+            if (medioEl) medioEl.textContent = medio;
+            if (largoEl) largoEl.textContent = largo;
+        }
+
+        function resetEvaluation() {
+            // Resetear scores
+            Object.keys(scores).forEach(key => {
+                scores[key] = null;
+            });
+
+            // Resetear UI
+            document.querySelectorAll('.matrix-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'rgba(31, 41, 55, 1)';
+                btn.style.color = '';
+                btn.style.fontWeight = '';
+            });
+
+            // Resetear resultados
+            const totalScoreEl = document.getElementById('total-score');
+            if (totalScoreEl) totalScoreEl.textContent = '0.0';
+
+            const progressCircle = document.getElementById('progress-circle');
+            if (progressCircle) progressCircle.style.strokeDashoffset = 326.72;
+
+            ['pavimento', 'geo', 'inter', 'lat'].forEach(cat => {
+                const catEl = document.getElementById(`cat-${cat}`);
+                const barEl = document.getElementById(`bar-${cat}`);
+                if (catEl) catEl.textContent = '0.0';
+                if (barEl) barEl.style.width = '0%';
+            });
+
+            const resultMsg = document.getElementById('result-message');
+            if (resultMsg) {
+                resultMsg.innerHTML = `
+                    <div class="text-xs font-mono text-gray-500 mb-1">DIAGNÓSTICO</div>
+                    <div class="text-sm text-white">Complete la evaluación para obtener resultado</div>
+                `;
+            }
+
+            const recsSection = document.getElementById('recommendations-section');
+            if (recsSection) recsSection.classList.add('hidden');
+        }
+
+        function exportReport() {
+            const totalScore = document.getElementById('total-score').textContent;
+            const date = new Date().toLocaleDateString('es-ES');
+
+            let report = `INFORME DE EVALUACIÓN - SM4A4L
+Fecha: ${date}
+===============================
+
+PUNTUACIÓN GENERAL: ${totalScore}/4.0
+
+DETALLE POR CATEGORÍA:
+- Pavimento: ${document.getElementById('cat-pavimento').textContent}/4.0
+- Geometría: ${document.getElementById('cat-geo').textContent}/4.0
+- Intersecciones: ${document.getElementById('cat-inter').textContent}/4.0
+- Seguridad Lateral: ${document.getElementById('cat-lat').textContent}/4.0
+
+RECOMENDACIONES:
+${document.getElementById('recommendations-list').innerText}
+
+Generado por SM4A4L - Infraestructura Segura`;
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `informe-sm4a4l-${date.replace(/\//g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function shareResults() {
+            const totalScore = document.getElementById('total-score').textContent;
+            const text = `Evaluación de Infraestructura Vial SM4A4L: Puntuación ${totalScore}/4.0. ${totalScore >= 3 ? '✓ Óptimo' : '⚠ Requiere atención'}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Evaluación SM4A4L',
+                    text: text,
+                    url: window.location.href
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Resultados copiados al portapapeles');
+                });
+            }
+        }
+
+        // Scroll spy para navegación
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) return;
+            scrollTimeout = setTimeout(() => {
+                const sections = ['hero', 'contexto', 'sistema', 'riesgos', 'diseno', 'evaluacion', 'herramientas'];
+                let current = '';
+
+                sections.forEach(section => {
+                    const element = document.getElementById(section);
+                    if (element) {
+                        const rect = element.getBoundingClientRect();
+                        if (rect.top <= 150 && rect.bottom >= 150) {
+                            current = section;
+                        }
+                    }
+                });
+
+                if (current) {
+                    updateActiveNav(current);
+                }
+                scrollTimeout = null;
+            }, 50);
+        });
+
+        // Efecto parallax en hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallax = document.getElementById('parallax-hero');
+            if (parallax) {
+                parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Inicializar tooltips o elementos dinámicos si es necesario
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animación inicial del hero
+            if (typeof gsap !== 'undefined') {
+                gsap.from("#hero h1", {
+                    duration: 1,
+                    y: 50,
+                    opacity: 0,
+                    ease: "power3.out"
+                });
+
+                gsap.from(".neon-card", {
+                    duration: 0.8,
+                    y: 30,
+                    opacity: 0,
+                    stagger: 0.2,
+                    ease: "power2.out",
+                    delay: 0.5
+                });
+            }
+
+            // Inicializar iconos de Lucide
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
